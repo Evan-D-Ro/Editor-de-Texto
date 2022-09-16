@@ -1,5 +1,11 @@
 #include "TadStringDinamica.h"
 
+struct DescritorEditor{
+	TpLinha *Linhas
+	int quantLinhas;
+	int quantCaracteres;
+};
+
 struct TpLinha{
 	TpLinha *ant, *prox;
 	StrDin *textoLinha;
@@ -12,7 +18,7 @@ void InicializaLinha(TpLinha **linha){
 	*linha = NULL;
 }
 
-void insereLinha(TpLinha **linha)
+void insereLinha(TpLinha **linha, int contLinha)
 {
 	TpLinha *nova, *aux;
 	nova = (TpLinha *)malloc(sizeof(TpLinha));
@@ -25,10 +31,24 @@ void insereLinha(TpLinha **linha)
 	else
 	{
 		aux = *linha;
-		while(aux->prox != NULL)
+		while(contLinha>0)
+		{
 			aux=aux->prox;
-		nova->ant = aux;
-		aux->prox=nova;
+			contLinha--;
+		}
+		if(aux->prox == NULL)
+		{
+			aux->prox=nova;
+			nova->ant = aux;
+		}
+		else
+		{
+			aux->prox->ant=nova;
+			nova->prox=aux->prox;
+			nova->ant=aux;
+			aux->prox=nova;
+		}		
+
 	}
 }
 
@@ -41,6 +61,21 @@ void ExibeLinhas(TpLinha *Linha, int x, int y)
 		ExibeLinhas(Linha->prox, x,++y);
 	}
 }
+
+void ExibeTeste(TpLinha *Linha, int x, int y)
+{
+	while(Linha->prox != NULL)
+	{
+		Linha = Linha->prox;
+	}
+	while(Linha->textoLinha->prox != NULL)
+	{
+		Linha->textoLinha = Linha->textoLinha->prox;
+	}
+	gotoxy(x,y), printf("%c", Linha->textoLinha->letra);
+}
+
+
 
 
 

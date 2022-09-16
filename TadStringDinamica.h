@@ -30,7 +30,20 @@ void reiniciaR(StrDin **str, StrDin *s)
 	}
 }
 
-void insereChar(StrDin **s, char letra)
+void insereCharIni(StrDin **s, char letra)
+{
+	StrDin *nova, *aux;
+	nova = (StrDin *)malloc(sizeof(StrDin));
+	nova->letra=letra;
+	nova->ant=NULL;
+	
+	(*s)->ant=nova;
+	nova->prox=*s;
+	*s = nova;
+
+}
+
+void insereChar(StrDin **s, char letra, int Sentinela)
 {
 	StrDin *nova, *aux;
 	nova = (StrDin *)malloc(sizeof(StrDin));
@@ -42,10 +55,23 @@ void insereChar(StrDin **s, char letra)
 	else
 	{
 		aux = *s;
-		while(aux->prox != NULL)
+		while(Sentinela > 0)
+		{
 			aux=aux->prox;
-		aux->prox=nova;
-		nova->ant = aux;
+			Sentinela--;
+		}
+		if(aux->prox == NULL)
+		{
+			aux->prox=nova;
+			nova->ant = aux;
+		}
+		else
+		{
+			aux->prox->ant=nova;
+			nova->prox=aux->prox;
+			nova->ant=aux;
+			aux->prox=nova;
+		}		
 	}
 }
 
@@ -59,6 +85,19 @@ int QuantEspacos(StrDin *string)
 		string=string->prox;
 	}
 	return cont;
+}
+
+int retornaUltimoEspaco(StrDin *string)
+{
+	int cont=0, retorno=0;
+	while(string != NULL)
+	{
+		if(string->letra == 32)
+			retorno = cont;
+		string=string->prox;
+		cont++;
+	}
+	return retorno;
 }
 
 void Exibe(StrDin *str, int x, int y, int numCFaltando)
@@ -78,6 +117,7 @@ void Exibe(StrDin *str, int x, int y, int numCFaltando)
 	}
 }
 
+
 StrDin *RetornaSubstring(StrDin *str, int andar)
 {
 	int i;
@@ -88,20 +128,30 @@ StrDin *RetornaSubstring(StrDin *str, int andar)
 	return str;
 }
 
-void copia(StrDin *str1, StrDin **str2)
+//void copia(StrDin *str1, StrDin **str2)
+//{
+//	while(str1 != NULL)
+//	{
+//		insereChar(&*str2, str1->letra);
+//		str1 = str1->prox;
+//	}
+//}
+
+void PosicaoSentinela(StrDin *str1, StrDin **str2, int contColuna)
 {
-	while(str1 != NULL)
+	while(contColuna > 0)
 	{
-		insereChar(&*str2, str1->letra);
 		str1 = str1->prox;
+		contColuna--;
 	}
+	*str2 = str1;
 }
 
-void concatena(StrDin *str1, StrDin *str2, StrDin **str3)
-{
-	copia(str1,&*str3);
-	copia(str2,&*str3);
-}
+//void concatena(StrDin *str1, StrDin *str2, StrDin **str3)
+//{
+//	copia(str1,&*str3);
+//	copia(str2,&*str3);
+//}
 
 int removeChars(StrDin **str, int start, int nro)
 {

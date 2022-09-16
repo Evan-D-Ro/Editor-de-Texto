@@ -37,6 +37,7 @@
 void Menu(void)
 {
 	int i;
+	system("cls");
 	textbackground(LIGHTGRAY);
 	textcolor(BLACK);
 	gotoxy(0,0), printf("| F2 - ABRIR | F3 - SALVAR | F4 - SAIR | F5 - EXIBIR | F10- NEGRITO |");
@@ -52,56 +53,87 @@ void Menu(void)
 	{
 		gotoxy(i, 29),printf("%c", 205);
 	}
-
 	textbackground(BLACK);
 	textcolor(LIGHTGRAY);
 }
 
-void LeCaracter(char c, TpLinha **Linha, TpLinha **Atual, int &startEspaco, int &contColuna, int &contLinha)
+void insereCaracter(char c, TpLinha **Linha, TpLinha **Atual, int &startEspaco, int &contColuna, int &contLinha)
 {
 	char auxC;
+	int x=3, y=4, ultimoEspaco;
 	TpLinha *AuxAtual;
 	StrDin *Aux;
 		
-		if((*Atual)->numCaracteres<70 || c != VK_Enter)
+		if((*Atual)->numCaracteres<15 || c != VK_Enter)
 		{
-			insereChar(&(*Atual)->textoLinha, c);
-			(*Atual)->numCaracteres++;
-			contColuna++;
+			if(contColuna == -1)
+			{
+				insereCharIni(&(*Atual)->textoLinha, c);
+				(*Atual)->numCaracteres++;
+				contColuna=1;
+			}
+			else
+			{
+				insereChar(&(*Atual)->textoLinha, c, contColuna-1);
+				(*Atual)->numCaracteres++;
+				contColuna++;
+			}
+		
 			
 			if(c == VK_Espaco)
-				startEspaco = (*Atual)->numCaracteres;
-				
+				startEspaco = contColuna;
 		}
 		
-		if((*Atual)->numCaracteres == 70 || c == VK_Enter)
+		if((*Atual)->numCaracteres == 15 || c == VK_Enter)
 		{
-			insereLinha(&(*Linha));
+			insereLinha(&(*Linha), contLinha);
 			*Atual = (*Atual)->prox;
 			contLinha++;
 			contColuna=0;
 			AuxAtual=(*Atual);
+			if(contColuna != numCaracteres)
+			{
+				ultimoEspaco = retornaUltimoEspaco(RetornaSubstring((*Atual)->ant->textoLinha);
+				if(ultimoEspaco == 0)
+				{
+					Aux = RetornaSubstring(((*Atual)->ant->textoLinha), (*Atual)->ant->numCaracteres);
+					auxC = Aux->letra;
+					insereChar(&(*Atual)->textoLinha, auxC,contColuna-1);
+					(*Atual)->numCaracteres++;
+				}
+			}
 			if(c != VK_Espaco && c != VK_Enter && startEspaco != 0 )
 			{
 				Aux = RetornaSubstring((*Atual)->ant->textoLinha, startEspaco-1);
 				while(Aux != NULL)
 				{
 					auxC = Aux->letra;
-					insereChar(&(*Atual)->textoLinha, auxC);
+					insereChar(&(*Atual)->textoLinha, auxC,contColuna-1);
 					(*Atual)->numCaracteres++;
 					Aux = Aux->prox;
 					contColuna++;
-					if((*Atual)->numCaracteres==70 || auxC==VK_Enter)
+					if((*Atual)->numCaracteres==15 || auxC==VK_Enter)
 					{
-						insereLinha(&(*Linha));
+						insereLinha(&(*Linha),contLinha++);
 						*Atual = (*Atual)->prox;
 						contLinha++;
 					}
 				}
-				AuxAtual->ant->numCaracteres-=removeChars(&AuxAtual->ant->textoLinha, startEspaco-1, 70);
+				AuxAtual->ant->numCaracteres-=removeChars(&AuxAtual->ant->textoLinha, startEspaco-1, 15);
 				startEspaco=0;
 			}
 		}
+}
+
+void Atualiza(int contLinha, int contColuna)
+{
+	gotoxy(1, 30), printf("LINHA:    - COLUNA:    ");
+	gotoxy(1, 30), printf("LINHA: %d - COLUNA: %d", contLinha+1, contColuna);
+}
+
+void DeletaCaracter(TpLinha **Linha, int Sentinela)
+{
+	
 }
 
 int main()
@@ -110,7 +142,7 @@ int main()
 	int contLinha=0, contColuna=0, i;
 	int x=3, y=4;
 	TpLinha *Linha, *Atual;
-	StrDin *Sentinela, *aux;
+	StrDin *Sentinela;
 	int startEspaco=0;
 	Menu();
 	InicializaLinha(&Linha);
@@ -144,16 +176,35 @@ int main()
 					//printf("Page Down - Ultima pagina\n");				
 					break;
 				case VK_Left:
-					//printf("Seta <-\n");
+						PosicaoSentinela(Atual->textoLinha, &Sentinela, contColuna-1);
+						if(Sentinela->ant != NULL)
+						{
+							contColuna--;
+							Sentinela = Sentinela->ant;
+							gotoxy(contColuna+x, contLinha+y);
+						}
+						else
+						{
+							contColuna=-1;
+							gotoxy(contColuna+x+1, contLinha+y);
+						}
 					break;
 				case VK_Up:
-					//printf("Seta /\\\n");
+					contLinha--;
+					gotoxy(contColuna+x, contLinha+y);
 					break;
 				case VK_Down:
-					//printf("Seta \\/\n");
+					contLinha++;
+					gotoxy(contColuna+x, contLinha+y);
 					break;
 				case VK_Right:
-					//printf("Seta ->\n");
+					PosicaoSentinela(Atual->textoLinha, &Sentinela, contColuna-1);
+					if(Sentinela->prox != NULL)
+					{
+						contColuna++;
+						Sentinela = Sentinela->prox;
+						gotoxy(contColuna+x, contLinha+y);
+					}
 					break;	
 
       		}
@@ -178,48 +229,23 @@ int main()
 						//printf("F5 - EXIBIR\n");
 						break;
 					case VK_F10:
-						//printf("F10 - NEGRITO\n");
+						
 						break;
 				}
 			}
 			else
 			{	
-
-				if(c>=32)
+				if(c == VK_Backspace)
 				{
-					LeCaracter(c, &Linha, &Atual, startEspaco, contColuna, contLinha);
-					if(Atual->numCaracteres > 1)
-					{
-						Sentinela= Sentinela->prox;				
-					}
-					else
-					{
-						Sentinela = Atual->textoLinha;
-					}
+					
 				}
 				else
 				{
-					if(c == VK_Backspace)
-					{						
-						if(Atual->numCaracteres>0)
-						{
-							aux = Sentinela;
-							Sentinela = Sentinela->ant;
-							Sentinela->prox=NULL;
-							aux->ant=NULL;
-							free(aux);
-							Atual->numCaracteres--;
-							contColuna--;
-						}
-						else
-						{
-							Atual=NULL;
-						}
-					}
+					insereCaracter(c, &Linha, &Atual, startEspaco, contColuna, contLinha);	
 				}
 				ExibeLinhas(Linha, x, y);
-				gotoxy(contColuna+x,contLinha+y);	
-
+				Atualiza(contLinha, contColuna);
+				gotoxy(contColuna+x, contLinha+y);
 			}
 		}
 
