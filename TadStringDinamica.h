@@ -30,26 +30,7 @@ void reiniciaR(StrDin **str, StrDin *s)
 	}
 }
 
-void insereChar(StrDin **s, char letra)
-{
-	StrDin *nova, *aux;
-	nova = (StrDin *)malloc(sizeof(StrDin));
-	nova->letra=letra;
-	nova->ant=NULL;
-	nova->prox=NULL;
-	if(*s == NULL)
-		*s = nova;
-	else
-	{
-		aux = *s;
-		while(aux->prox != NULL)
-			aux=aux->prox;
-		aux->prox=nova;
-		nova->ant = aux;
-	}
-}
-
-int QuantEspacos(StrDin *string)
+int quantEspacos(StrDin *string)
 {
 	int cont=0;
 	while(string != NULL)
@@ -61,20 +42,91 @@ int QuantEspacos(StrDin *string)
 	return cont;
 }
 
-void Exibe(StrDin *str, int x, int y, int numCFaltando)
+void buscaPonto(StrDin *string, StrDin **ponto)
 {
-	if(str != NULL)
+	*ponto = NULL;
+	while(string != NULL)
 	{
-		gotoxy(x,y),printf("%c", str->letra);
-		Exibe(str->prox,++x,y, numCFaltando);
+		if(string->letra == '.' || string->letra == '?' || string->letra == '!')
+			*ponto = string;
+		string = string->prox;
 	}
-	else
+}
+
+int ultimaPalavra(StrDin *string, StrDin **inicio, StrDin **fim)
+{
+	int cont=1;
+	(*inicio) =  string;
+	(*fim) = string;
+	while(string->prox != NULL)
 	{
-		while(numCFaltando>0)
+		if(string->letra == 21)
+			string = string->prox;
+		else
 		{
-			gotoxy(x++,y),printf(" ");
-			numCFaltando--;
+			if(string->letra == 32)
+			{	
+				cont=0;
+				(*inicio)=string;
+				if(string->prox !=NULL)
+					(*inicio) = (*inicio)->prox;
+			}
+			(*fim)=string;
+			string=string->prox;
+			cont++;
 		}
+
+	}
+	return cont;
+}
+
+int ultimoEspaco(StrDin *string)
+{
+	int cont=0;
+	int ultimoEspaco=-1;
+	while(string != NULL)
+	{
+		if(string->letra == 32)
+		{	
+			ultimoEspaco = cont;
+		}
+		string=string->prox;
+		cont++;
+	}
+	return ultimoEspaco;
+}
+
+void Exibe(StrDin *str, int x, int y, int limiteCaractere, int &color)
+{
+	int i=0;
+	while(str != NULL)
+	{
+		if(str->letra != 13 && str->letra != 21)
+		{
+			gotoxy(x,y),printf("%c", str->letra);
+			x++;
+			i++;
+		}
+		if(str->letra == 21)
+		{
+			if(color == 8)
+			{
+				color= 15;
+				textcolor(color);
+			}
+			else
+			{
+				color=8;
+				textcolor(color);
+			}
+		}
+		str=str->prox;
+	}
+	while(i<limiteCaractere)
+	{
+		gotoxy(x,y), printf(" ");
+		x++;
+		i++;
 	}
 }
 
@@ -86,21 +138,6 @@ StrDin *RetornaSubstring(StrDin *str, int andar)
 		str=str->prox;
 	}
 	return str;
-}
-
-void copia(StrDin *str1, StrDin **str2)
-{
-	while(str1 != NULL)
-	{
-		insereChar(&*str2, str1->letra);
-		str1 = str1->prox;
-	}
-}
-
-void concatena(StrDin *str1, StrDin *str2, StrDin **str3)
-{
-	copia(str1,&*str3);
-	copia(str2,&*str3);
 }
 
 int removeChars(StrDin **str, int start, int nro)
